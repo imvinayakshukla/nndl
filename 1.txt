@@ -1,0 +1,62 @@
+import numpy as np
+
+class Perceptron:
+    def __init__(self, learning_rate=0.1, epochs=10):
+        self.learning_rate = learning_rate
+        self.epochs = epochs
+        self.weights = None
+        self.bias = None
+
+    def sigmoid(self, x):
+        return 1 / (1 + np.exp(-x))
+
+    def predict(self, x):
+        linear_output = np.dot(x, self.weights) + self.bias
+        return self.sigmoid(linear_output)
+
+    def fit(self, x, y):
+        self.weights = np.zeros(x.shape[1])
+        self.bias = 0
+
+        for _ in range(self.epochs):
+            for sample, target in zip(x, y):
+                y_pred = self.sigmoid(np.dot(sample, self.weights) + self.bias)
+                error = target - y_pred
+                gradient = self.learning_rate * error * y_pred * (1 - y_pred)
+                self.weights += gradient * sample
+                self.bias += gradient
+
+
+# AND gate data
+x_and = np.array([[0, 0],
+                  [0, 1],
+                  [1, 0],
+                  [1, 1]])
+y_and = np.array([0, 0, 0, 1])  # AND outputs
+
+# OR gate data
+x_or = np.array([[0, 0],
+                 [0, 1],
+                 [1, 0],
+                 [1, 1]])
+y_or = np.array([0, 1, 1, 1])  # OR outputs
+
+# Create and train the perceptron for AND gate
+perceptron_and = Perceptron(learning_rate=0.1, epochs=1000)
+perceptron_and.fit(x_and, y_and)
+
+# Test the AND gate
+print("AND gate predictions:")
+for i in range(len(x_and)):
+    prediction = perceptron_and.predict(x_and[i])
+    print(f"Input: {x_and[i]} - Prediction: {1 if prediction >= 0.5 else 0}")
+
+# Create and train the perceptron for OR gate
+perceptron_or = Perceptron(learning_rate=0.1, epochs=1000)
+perceptron_or.fit(x_or, y_or)
+
+# Test the OR gate
+print("\nOR gate predictions:")
+for i in range(len(x_or)):
+    prediction = perceptron_or.predict(x_or[i])
+    print(f"Input: {x_or[i]} - Prediction: {1 if prediction >= 0.5 else 0}")
