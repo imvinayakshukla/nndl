@@ -1,67 +1,40 @@
 import numpy as np
 
-class Perceptron:
-    def __init__(self, learning_rate=0.1, epochs=100):
-        self.learning_rate = learning_rate
-        self.epochs = epochs
-        self.weights = None
-        self.bias = None
+# Input data: AND function
+x = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([0, 1, 1, 1])  # Target outputs for AND
 
-    def sigmoid(self, x):
-        return 1 / (1 + np.exp(-x))
+# Initialize weights and bias
+w1 = 0.8
+w2 = 0.9
+bias = 0.25
+learning_rate = 0.1
 
-    def predict(self, x):
-        linear_output = np.dot(x, self.weights) + self.bias
-        return self.sigmoid(linear_output)
+# Sigmoid activation function
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
-    def fit(self, x, y):
-        num_samples, num_features = x.shape
-        self.weights = np.zeros(num_features)
-        self.bias = 0
+# Training loop
+for epoch in range(500000):
+    for i in range(4):
+        # Calculate the weighted input plus bias
+        z = x[i][0] * w1 + x[i][1] * w2 + bias
+        result = sigmoid(z)
 
-        for _ in range(self.epochs):
-            for idx, sample in enumerate(x):
-                linear_output = np.dot(sample, self.weights) + self.bias
-                y_predicted = self.sigmoid(linear_output)
+        # Calculate the error
+        error = y[i] - result
+        
+        # Update weights and bias
+        w1 += learning_rate * error * x[i][0]
+        w2 += learning_rate * error * x[i][1]
+        bias += learning_rate * error
 
-                # Calculate the error
-                error = y[idx] - y_predicted
+# Testing the trained model
+print("Final weights:", w1, w2)
+print("Final bias:", bias)
 
-                # Update weights and bias
-                self.weights += self.learning_rate * error * y_predicted * (1 - y_predicted) * sample
-                self.bias += self.learning_rate * error * y_predicted * (1 - y_predicted)
-
-# AND gate data
-x_and = np.array([[0, 0],
-                  [0, 1],
-                  [1, 0],
-                  [1, 1]])
-y_and = np.array([0, 0, 0, 1])  # AND outputs
-
-# OR gate data
-x_or = np.array([[0, 0],
-                 [0, 1],
-                 [1, 0],
-                 [1, 1]])
-y_or = np.array([0, 1, 1, 1])  # OR outputs
-
-# Create and train the perceptron for AND gate
-perceptron_and = Perceptron(learning_rate=0.1, epochs=1000)
-perceptron_and.fit(x_and, y_and)
-
-# Test the AND gate
-print("AND gate predictions:")
-for i in range(len(x_and)):
-    prediction = perceptron_and.predict(x_and[i])
-    print(f"Input: {x_and[i]} - Prediction: {1 if prediction >= 0.5 else 0}")
-
-# Create and train the perceptron for OR gate
-perceptron_or = Perceptron(learning_rate=0.1, epochs=1000)
-perceptron_or.fit(x_or, y_or)
-
-# Test the OR gate
-print("\nOR gate predictions:")
-for i in range(len(x_or)):
-    prediction = perceptron_or.predict(x_or[i])
-    print(f"Input: {x_or[i]} - Prediction: {1 if prediction >= 0.5 else 0}")
-     
+# Show results for all inputs
+for i in range(4):
+    z = x[i][0] * w1 + x[i][1] * w2 + bias
+    result = sigmoid(z)
+    print(f"Input: {x[i]}, Output: {result:.4f}, Predicted: {1 if result >= 0.5 else 0}")
